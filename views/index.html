@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,23 +8,22 @@
 </head>
 <body>
     <div class="container">
-        <h1>Send Bulk Individual Emails</h1>
+        <h1>Send Bulk Emails</h1>
         <form action="/send-emails" method="POST" enctype="multipart/form-data">
-            <label for="emails">Emails (Comma-separated):</label>
-            <textarea name="emails" id="emails" rows="5" placeholder="Enter multiple emails separated by commas" required></textarea>
+            <label for="file">Upload Excel File:</label>
+            <input type="file" name="file" id="file" accept=".xlsx, .xls" required>
+
+            <label for="attachment">Upload Attachment (Optional):</label>
+            <input type="file" name="attachment" id="attachment" accept="*/*">
 
             <label for="subject">Subject:</label>
-            <input type="text" name="subject" id="subject" placeholder="Enter email subject" required>
+            <input type="text" name="subject" id="subject" placeholder="Enter email subject">
 
             <label for="body">Body:</label>
             <textarea name="body" id="body" rows="8" placeholder="Enter email body" required></textarea>
-
-            <label for="attachment">Attach Document:</label>
-            <input type="file" name="attachment" id="attachment" required>
 
             <button type="submit">Send Emails</button>
         </form>
     </div>
 </body>
 </html>
-        
