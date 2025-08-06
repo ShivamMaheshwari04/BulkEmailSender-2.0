@@ -69,7 +69,7 @@ app.get('/', authMiddleware, (req, res) => {
 });
 
 app.post('/send-emails', authMiddleware, upload.fields([{ name: 'file' }, { name: 'attachment' }]), async (req, res) => {
-    const { body } = req.body;
+    const { subject,body } = req.body;
     const excelFilePath = req.files['file'] ? req.files['file'][0].path : null;
     const attachmentFilePath = req.files['attachment'] ? req.files['attachment'][0].path : null;
 
@@ -84,10 +84,9 @@ app.post('/send-emails', authMiddleware, upload.fields([{ name: 'file' }, { name
 
         const emailsData = [];
         data.slice(1).forEach(row => {
-            const companyName = row[0] || 'Your Company';
+            const companyName = row[0];
             const emails = row[1] ? row[1].split(',').map(email => email.trim()) : [];
-            const position = row[2] || 'Web Development Using MERN';
-            const subject = row[3] || `Application for Internship/Entry-Level Position in ${position}`;
+            const position = row[2];
             emails.forEach(email => emailsData.push({ companyName, email, position, subject }));
         });
 
@@ -108,11 +107,7 @@ app.post('/send-emails', authMiddleware, upload.fields([{ name: 'file' }, { name
                 from: `${process.env.USER_NAME} <${process.env.GMAIL_USER}>`,
                 to: email,
                 subject: subject,
-                text: `Dear Sir/Mam,
-
-I hope this email finds you well. My name is ${process.env.USER_NAME}, and I am an experienced ${process.env.JOB_ROLE} with a strong background in ${process.env.SKILLS} I am writing to express my interest in the ${position} at ${companyName}.
-
-${body}`,
+                text: `${body}`,
             };
 
             if (attachmentFilePath) {
