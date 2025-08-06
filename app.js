@@ -11,6 +11,9 @@ const app = express();
 const port = 2000;
 let counter = 0;
 
+
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
@@ -46,9 +49,9 @@ app.post('/send-emails', upload.fields([{ name: 'file' }, { name: 'attachment' }
         // Extract data from Excel
         const emailsData = [];
         data.slice(1).forEach(row => {
-            const companyName = row[0] || 'Unknown Company';
+            const companyName = row[0] || 'Your Company'; // Unknown Company
             const emails = row[1] ? row[1].split(',').map(email => email.trim()) : [];
-            const position = row[2] || 'Web Development Intern Using MERN';
+            const position = row[2] || 'Web Development Using MERN'; // QA
             emails.forEach(email => emailsData.push({ companyName, email, position }));
         });
 

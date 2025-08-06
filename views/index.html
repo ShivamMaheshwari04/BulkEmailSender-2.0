@@ -12,6 +12,9 @@
         <form action="/send-emails" method="POST" enctype="multipart/form-data">
             <label for="file">Upload Excel File:</label>
             <input type="file" name="file" id="file" accept=".xlsx, .xls" required>
+            <span><a href="/uploads/Test.xlsx" download>Download Test.xlsx</a></span>
+
+
 
             <label for="attachment">Upload Attachment (Optional):</label>
             <input type="file" name="attachment" id="attachment" accept="*/*">

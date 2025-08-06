@@ -1,0 +1,23 @@
+During my academic journey, I have built a solid foundation in various technical domains and honed my skills in:
+
+Technical Skills: Java, HTML, CSS, and JavaScript
+Databases: MySQL
+Frameworks: Node.js, Express.js, Bootstrap, Tailwind CSS, and React.js
+Tools: VS Code, Git, GitHub, MySQL Workbench, and MS Excel
+In addition to my coursework, I have actively contributed to open-source projects and earned badges during Hacktoberfest, showcasing my passion for collaborative development and continuous learning. These experiences have taught me how to work effectively in teams, contribute to codebases, and tackle real-world challenges.
+
+I am particularly interested in your company because of its commitment to innovation and fostering a collaborative environment. If any suitable position is available, I would be honored to be considered. I believe my technical expertise, coupled with my enthusiasm for learning and problem-solving, aligns well with your requirements.
+
+I am attaching my resume and providing a link to my portfolio:( https://shivammaheshwari-portfolio.netlify.app/ ), where you can explore my projects and contributions in more detail.
+
+I would greatly appreciate the opportunity to discuss how my qualifications and experiences make me a strong candidate for your team. Please feel free to reach out if further information is needed.
+
+Thank you for considering my application. I look forward to the possibility of working with your esteemed organization.
+
+Sincerely,
+Shivam Maheshwari
+Phone: 7223018161
+Email: Shivammaheshwari0401@gmail.com
+GitHub: github.com/ShivamMaheshwari04
+LinkedIn: linkedin.com/in/shivam-maheshwari04/
+Portfolio: shivammaheshwari-portfolio.netlify.app
