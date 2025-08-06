@@ -5,33 +5,70 @@ const multer = require('multer');
 const nodemailer = require('nodemailer');
 const path = require('path');
 const fs = require('fs');
-const xlsx = require('xlsx'); // For parsing Excel files
+const xlsx = require('xlsx');
+const session = require('express-session');
 
 const app = express();
 const port = 2000;
 let counter = 0;
 
+// Session middleware
+app.use(session({
+    secret: process.env.SESSION_SECRET || 'mysecretkey',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false }, // Set true if using HTTPS
+}));
+
+// Middleware to check if logged in
+function authMiddleware(req, res, next) {
+    if (req.session && req.session.authenticated) {
+        next();
+    } else {
+        res.redirect('/login');
+    }
+}
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
 
-// Multer setup for file uploads
+// Multer setup
 const storage = multer.diskStorage({
     destination: './uploads/',
     filename: (req, file, cb) => {
-        cb(null, file.originalname); // Keep the original filename for uploaded files
+        cb(null, file.originalname);
     },
 });
 const upload = multer({ storage });
 
-app.get('/', (req, res) => {
+// Routes
+app.get('/login', (req, res) => {
+    res.send(`
+        <form method="POST" action="/login" style="max-width:400px;margin:50px auto;font-family:sans-serif;">
+            <h2>Admin Login</h2>
+            <input type="password" name="password" placeholder="Enter Password" required style="width:100%;padding:10px;margin-bottom:10px;"/>
+            <button type="submit" style="padding:10px 20px;">Login</button>
+        </form>
+    `);
+});
+
+app.post('/login', (req, res) => {
+    const { password } = req.body;
+    if (password === process.env.SECRET) {
+        req.session.authenticated = true;
+        res.redirect('/');
+    } else {
+        res.send('Invalid password. <a href="/login">Try again</a>');
+    }
+});
+
+app.get('/', authMiddleware, (req, res) => {
     res.sendFile(path.join(__dirname, 'views/index.html'));
 });
 
-app.post('/send-emails', upload.fields([{ name: 'file' }, { name: 'attachment' }]), async (req, res) => {
+app.post('/send-emails', authMiddleware, upload.fields([{ name: 'file' }, { name: 'attachment' }]), async (req, res) => {
     const { body } = req.body;
     const excelFilePath = req.files['file'] ? req.files['file'][0].path : null;
     const attachmentFilePath = req.files['attachment'] ? req.files['attachment'][0].path : null;
@@ -41,21 +78,19 @@ app.post('/send-emails', upload.fields([{ name: 'file' }, { name: 'attachment' }
     }
 
     try {
-        // Parse Excel file
         const workbook = xlsx.readFile(excelFilePath);
         const sheet = workbook.Sheets[workbook.SheetNames[0]];
         const data = xlsx.utils.sheet_to_json(sheet, { header: 1 });
 
-        // Extract data from Excel
         const emailsData = [];
         data.slice(1).forEach(row => {
-            const companyName = row[0] || 'Your Company'; // Unknown Company
+            const companyName = row[0] || 'Your Company';
             const emails = row[1] ? row[1].split(',').map(email => email.trim()) : [];
-            const position = row[2] || 'Web Development Using MERN'; // QA
-            emails.forEach(email => emailsData.push({ companyName, email, position }));
+            const position = row[2] || 'Web Development Using MERN';
+            const subject = row[3] || `Application for Internship/Entry-Level Position in ${position}`;
+            emails.forEach(email => emailsData.push({ companyName, email, position, subject }));
         });
 
-        // Remove duplicate emails
         const uniqueEmailsData = emailsData.filter((v, i, a) =>
             a.findIndex(t => t.email === v.email) === i
         );
@@ -68,24 +103,22 @@ app.post('/send-emails', upload.fields([{ name: 'file' }, { name: 'attachment' }
             },
         });
 
-        // Send emails
-        for (const { companyName, email, position } of uniqueEmailsData) {
+        for (const { companyName, email, position, subject } of uniqueEmailsData) {
             const mailOptions = {
                 from: `${process.env.USER_NAME} <${process.env.GMAIL_USER}>`,
                 to: email,
-                subject: `Application for Internship/Entry-Level Position in ${position}`,
+                subject: subject,
                 text: `Dear Sir/Mam,
-                
-I hope this email finds you well. My name is Shivam Maheshwari, and I am from Gwalior, where I am currently pursuing my MCA from Madhav Institute of Technology and Science. I am writing to express my interest in the ${position} at ${companyName}.
+
+I hope this email finds you well. My name is ${process.env.USER_NAME}, and I am an experienced ${process.env.JOB_ROLE} with a strong background in ${process.env.SKILLS} I am writing to express my interest in the ${position} at ${companyName}.
 
 ${body}`,
             };
 
-            // Attach the resume file if provided
             if (attachmentFilePath) {
                 mailOptions.attachments = [
                     {
-                        filename: path.basename(attachmentFilePath), // Preserve original filename
+                        filename: path.basename(attachmentFilePath),
                         path: attachmentFilePath,
                     },
                 ];
@@ -93,12 +126,10 @@ ${body}`,
 
             await transporter.sendMail(mailOptions);
             counter++;
-            console.log(`Email - ${companyName} - #${counter}`); // Minimal log output
+            console.log(`Email - ${companyName} - #${counter}`);
         }
 
-        // Clean up Excel file (Resume is not deleted)
         fs.unlinkSync(excelFilePath);
-
         res.send('Emails sent successfully!');
     } catch (error) {
         console.error('Error processing emails:', error);
